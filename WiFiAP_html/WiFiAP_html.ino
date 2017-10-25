@@ -32,20 +32,60 @@
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h> 
+#include <WebSocketsServer.h> 
+//#include <ESP8266WiFiMulti.h> 
 #include <ESP8266WebServer.h>
+#include <Hash.h>
+
 #include "html_file.h"
+
 
 /* Set these to your desired credentials. */
 const char *ssid = "ESPap";
 const char *password = "thereisnospoon";
 
 ESP8266WebServer server(80);
-
 /* Just a little test message.  Go to http://192.168.4.1 in a web browser
  * connected to this access point to see it.
  */
 void handleRoot() {
 	server.send(200, "text/html", html_data);
+}
+
+WebSocketsServer webSocket = WebSocketsServer(81);
+void webSocketHandler(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+
+    switch(type) {
+        case WStype_DISCONNECTED:
+            Serial.printf("[%u] Disconnected!\n", num);
+            break;
+        case WStype_CONNECTED:
+            {
+                IPAddress ip = webSocket.remoteIP(num);
+                Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+				
+				// send message to client
+//				webSocket.sendTXT(num, "Connected");
+            }
+            break;
+        case WStype_TEXT:
+            Serial.printf("[%u] get Text: %s\n", num, payload);
+
+            // send message to client
+            // webSocket.sendTXT(num, "message here");
+
+            // send data to all connected clients
+            // webSocket.broadcastTXT("message here");
+            break;
+        case WStype_BIN:
+            Serial.printf("[%u] get binary length: %u\n", num, length);
+            hexdump(payload, length);
+
+            // send message to client
+            // webSocket.sendBIN(num, payload, length);
+            break;
+    }
+
 }
 
 void setup() {
@@ -59,11 +99,30 @@ void setup() {
 	IPAddress myIP = WiFi.softAPIP();
 	Serial.print("AP IP address: ");
 	Serial.println(myIP);
+
 	server.on("/", handleRoot);
 	server.begin();
 	Serial.println("HTTP server started");
+
+    webSocket.begin();
+    webSocket.onEvent(webSocketHandler);
+	Serial.println("Websocket Started");
 }
 
 void loop() {
+	Serial.println("Loopin");
 	server.handleClient();
+    webSocket.loop();
+
+    int rand_data[64+3];
+    char rand_string[300];
+    int length = 0;
+
+    for (int i=0;i<64+3;i++) {
+        rand_data[i] = random(99);
+        length += sprintf(rand_string+length, "%d,", rand_data[i]);
+    }
+
+    webSocket.broadcastTXT(rand_string);
+    delay(1000);
 }

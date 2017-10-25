@@ -100,7 +100,7 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
                 document.getElementById(\"oxy\").innerText=sensor_array[2];\
             }\
 \
-			var wsUri = \"ws://0.0.0.0:8080\";\
+			var wsUri = \"ws://192.168.4.1:81\";\
 			var output;\
 			\
 			function init() {\
@@ -117,11 +117,16 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
 			    };\
 			    websocket.onmessage = function(evt) {\
                     console.log(evt);\
-			    	var pin = evt.data.charAt(1);\
-			    	var element;\
                     \
-                    table_update();\
-                    sensor_update();\
+			    	var st = evt.data;\
+                    var rec_data = st.split(',');\
+                    var sensor_data = rec_data.splice(0,3);\
+                    var mat_data = [];\
+                    while(rec_data[0]) {\
+                        mat_data.push(rec_data.splice(0,8));\
+                    }\
+                    table_update(mat_data);\
+                    sensor_update(sensor_data);\
 \
 			    };\
 			    websocket.onerror = function(evt) {\
