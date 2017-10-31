@@ -116,8 +116,6 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
 			        console.log(\"DISCONNECTED\");\
 			    };\
 			    websocket.onmessage = function(evt) {\
-                    console.log(evt);\
-                    \
 			    	var st = evt.data;\
                     var rec_data = st.split(',');\
                     var sensor_data = rec_data.splice(0,3);\

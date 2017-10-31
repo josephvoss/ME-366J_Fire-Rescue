@@ -8,6 +8,10 @@
 #include <Hash.h>
 #include <TimerObject.h>
 
+//#include <NewPing.h>
+#include "HC_SR04.h"
+#include <Adafruit_AMG88xx.h>
+
 #include "html_file.h"
 
 /* Set these to your desired credentials. */
@@ -16,6 +20,18 @@ const char *password = "thereisnospoon";
 
 /* Pin definition */
 const int LED_PIN = 2;//LED_BUILTIN;
+
+/* Sensor definition */
+const int TRIGGER_PIN  = 13;  // Arduino pin tied to trigger pin on ping sensor.
+const int ECHO_PIN     = 15; // Arduino pin tied to echo pin on ping sensor.
+const int MAX_DISTANCE = 200; // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
+
+HC_SR04 sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+int sonar_range;
+
+// Thermal stuff
+Adafruit_AMG88xx amg;
+float pixels[AMG88xx_PIXEL_ARRAY_SIZE];
 
 // Callback timer function
 TimerObject *timer10ms = new TimerObject(100); //will call the callback in the interval of 100 ms
@@ -117,14 +133,22 @@ void SampleData() {
     now this function is used purely to generate random data to broadcast to 
     clients
 */
-   
+    amg.readPixels(pixels);
+
+
+    if (sonar.isFinished())
+    {
+        sonar_range = sonar.getRange(); //Returns range in cm
+        sonar.start();
+    }
     int length = 0;
 
     for (int i=0;i<64+3;i++) {
-        if (i == 0) 
-        {
-            rand_data[i] = 1;
-        }
+        if (i == 1) 
+            rand_data[i] = sonar_range;
+        else if (i > 1 && i < 65) 
+            //rand_data[i] = pixels[i-1];
+            rand_data[i] = random(99);
         else
         {
             rand_data[i] = random(99);
@@ -168,6 +192,9 @@ void setup() {
 
     timer10ms->setOnTimer(&SampleData);
     timer10ms->Start(); //start the thread.
+
+    sonar.start(); //start ultrasonic 
+    amg.begin();  //start thermal
 }
 
 void loop() {
