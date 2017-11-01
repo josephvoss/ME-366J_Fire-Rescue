@@ -3,7 +3,7 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
     <head>\
         <meta charset=\"utf-8\">\
         <title>\
-            WebSocket Test\
+            Deux Bot Controller\
         </title>\
         \
         <style>\
@@ -143,7 +143,7 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
     </head>\
     <body>\
         <h2>\
-            WebSocket Test\
+            Deux Bot Controller\
         </h2>\
        \
 \
