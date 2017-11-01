@@ -11,6 +11,7 @@
 //#include <NewPing.h>
 #include "HC_SR04.h"
 #include <Adafruit_AMG88xx.h>
+#include <Wire.h>
 
 #include "html_file.h"
 
@@ -146,9 +147,9 @@ void SampleData() {
     for (int i=0;i<64+3;i++) {
         if (i == 1) 
             rand_data[i] = sonar_range;
-        else if (i > 1 && i < 65) 
-            //rand_data[i] = pixels[i-1];
-            rand_data[i] = random(99);
+        else if (i > 2) 
+            rand_data[i] = pixels[i-3];
+    //        rand_data[i] = random(99);
         else
         {
             rand_data[i] = random(99);
@@ -194,7 +195,10 @@ void setup() {
     timer10ms->Start(); //start the thread.
 
     sonar.start(); //start ultrasonic 
+	Serial.println("Sonar started");
+
     amg.begin();  //start thermal
+	Serial.println("Thermal started");
 }
 
 void loop() {
