@@ -8,8 +8,7 @@
 #include <Hash.h>
 #include <TimerObject.h>
 
-#include <NewPing.h>
-//#include "HC_SR04.h"
+#include "HC_SR04.h"
 
 #include <Adafruit_AMG88xx.h>
 #include <Wire.h>
@@ -28,8 +27,7 @@ const int TRIGGER_PIN  = 13;  // Arduino pin tied to trigger pin on ping sensor.
 const int ECHO_PIN     = 15; // Arduino pin tied to echo pin on ping sensor.
 const int MAX_DISTANCE = 200; // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
-//HC_SR04 sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
-NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+HC_SR04 sonar(TRIGGER_PIN, ECHO_PIN, ECHO_PIN);
 int sonar_range;
 int sonar_counter = 0;
 
@@ -139,18 +137,11 @@ void SampleData() {
 */
     amg.readPixels(pixels);
 
-/*
+
     if (sonar.isFinished())
     {
         sonar_range = sonar.getRange(); //Returns range in cm
         sonar.start();
-    }
-*/
-    sonar_counter++;
-    if (sonar_counter == 6)
-    {
-//        sonar_range = sonar.ping_cm();
-        sonar_counter = 0;
     }
 
     int length = 0;
@@ -204,8 +195,8 @@ void setup() {
     timer10ms->setOnTimer(&SampleData);
     timer10ms->Start(); //start the thread.
 
-//    sonar.begin(); //start ultrasonic 
-//	Serial.println("Sonar started");
+    sonar.begin(); //start ultrasonic 
+	Serial.println("Sonar started");
 
     amg.begin();  //start thermal
 	Serial.println("Thermal started");
