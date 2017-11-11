@@ -1,4 +1,5 @@
-const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
+const char* html_data =" \
+<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
 <html>\
     <head>\
         <meta charset=\"utf-8\">\
@@ -35,12 +36,28 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
             .col-4{ width: 66.66%; }\
             .col-5{ width: 83.33%; }\
             .col-6{ width: 100%;   }\
+            \
+            .padded {padding: 1em;}\
+            .paddedx3 {padding: 3em;}\
 \
             .outline, .outline *{\
                 outline: 1px solid #F6A1A1; \
             }\
 \
-   \
+            .slider {\
+                -webkit-appearance: none;  /* Override default CSS styles */\
+                appearance: none;\
+                width: 100%; /* Full-width */\
+                height: 25px; /* Specified height */\
+                outline: none; /* Remove outline */\
+                opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */\
+                -webkit-transition: .2s; /* 0.2 seconds transition on hover */\
+                transition: opacity .2s;\
+            }\
+            /* Mouse-over effects */\
+            .slider:hover {\
+                opacity: 1; /* Fully shown on mouse-over */\
+            }\
 \
         </style>\
 \
@@ -96,7 +113,9 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
             }\
             function sensor_update(sensor_array) {\
                 document.getElementById(\"temp\").innerText=sensor_array[0];\
-                document.getElementById(\"ultra\").innerText=sensor_array[1];\
+                document.getElementById(\"ultral\").innerText=sensor_array[1];\
+                document.getElementById(\"ultraf\").innerText=sensor_array[1];\
+                document.getElementById(\"ultrar\").innerText=sensor_array[1];\
                 document.getElementById(\"oxy\").innerText=sensor_array[2];\
             }\
 \
@@ -117,6 +136,7 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
 			    };\
 			    websocket.onmessage = function(evt) {\
 			    	var st = evt.data;\
+                    \
                     var rec_data = st.split(',');\
                     var sensor_data = rec_data.splice(0,3);\
                     var mat_data = [];\
@@ -150,14 +170,14 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
         <div class=\"grid-container\">\
             <div class=\"row\">\
                 <div class=\"col-2\">\
-                    <div class=\"row\">\
+                    <div class=\"row padded\">\
                           <div class=\"col-2\"></div>\
                           <div class=\"col-2\"> \
                               <input type=\"button\" id=\"up\" value=\"up\">\
                           </div>\
                           <div class=\"col-2\"></div>\
                     </div>\
-                    <div class=\"row\">\
+                    <div class=\"row padded\">\
                           <div class=\"col-2\"> \
                               <input type=\"button\" id=\"left\" value=\"left\">\
                           </div>\
@@ -168,6 +188,27 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
                               <input type=\"button\" id=\"right\" value=\"right\">\
                           </div>\
                     </div>\
+                    <div class=\"row padded\">\
+                        <div class=\"col-4\"> \
+                            <input type=\"range\" min=\"1\" max=\"100\" value=\"50\" class=\"slider\" id=\"speed-slide\">\
+                        </div>\
+                        <div class=\"col-2\"> \
+                            <div id=\"speed-out\">50</div>\
+                        </div>\
+                    </div>\
+                    <div class=\"row padded\">\
+                    </div>\
+                    <div class=\"row\" style=\"text-align:center;\"> Ultrasonic Sensors\
+                    </div>\
+                    <div class=\"row padded\" style=\"text-align:center\" id=\"ultraf\">N/A</div>\
+                    <div class=\"row\">\
+                        <div class=\"col-2\" style=\"padding: 2em 0 0 0;\" id=\"ultral\" >N/A</div>\
+                        <div class=\"col-2\" style=\"border-color: red; border-style: solid; padding: 1em 0 5em 0; box-sizing: border-box;\">\
+                        </div>\
+                        <div class=\"col-2\" style=\"padding: 2em 0 0 0;\" id=\"ultrar\">N/A</div>\
+                    </div>\
+                    <div class=\"row padded\">\
+                    </div>\
 \
                 </div>\
                 <div class=\"col-2\"></div>\
@@ -177,11 +218,10 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
 \
                     <div class = \"row\" style=\"height:20px\"></div>\
                     <div class = \"row\" id=\"sensor_data\">\
-                        <div class=\"col-2\">Temp: <object id=\"temp\">N/A</object></div>\
-                        <div class=\"col-2\">Ultrasonic: <object id=\"ultra\">N/A</object></div>\
-                        <div class=\"col-2\">Oxygen: <object id=\"oxy\">N/A</object></div>\
+                        <div class=\"col-3\">Temp: <object id=\"temp\">N/A</object></div>\
+                        <div class=\"col-3\">Oxygen: <object id=\"oxy\">N/A</object></div>\
                     </div>\
-\
+                        \
                 </div>\
             </div>\
         </div>\
@@ -203,13 +243,19 @@ const char* html_data = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">\
         document.getElementById(\"right\").onclick = function(){\
             send_direction(document.getElementById(\"right\").value);\
         };\
+        document.getElementById(\"speed-slide\").onchange = function(){\
+            document.getElementById(\"speed-out\").outerHTML = document.getElementById(\"speed-slide\").value;\
+            send_direction(document.getElementById(\"speed-slide\").value);\
+        };\
 \
         document.addEventListener(\"keydown\", event => {\
-            if(event.key == \"w\") document.querySelector(\"#up\").click();             if(event.key == \"s\") document.querySelector(\"#down\").click(); \
+            if(event.key == \"w\") document.querySelector(\"#up\").click(); \
+            if(event.key == \"s\") document.querySelector(\"#down\").click();\
             if(event.key == \"a\") document.querySelector(\"#left\").click();\
-            if(event.key == \"d\") document.querySelector(\"#right\").click(); \
+            if(event.key == \"d\") document.querySelector(\"#right\").click();\
         });\
     </script>\
     </body>\
-</html>";\
+</html>";
+
 

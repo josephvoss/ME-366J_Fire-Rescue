@@ -6,7 +6,7 @@ HC_SR04 *HC_SR04::_instance(NULL);
 HC_SR04::HC_SR04(int trigger, int echo, int interrupt, int max_dist)
     : _trigger(trigger), _echo(echo), _int(interrupt), _max_dist(max_dist), _finished(false)
 {
-  if(_instance==0) _instance=this;    
+  if(_instance==0) _instance=this;
 }
 
 void HC_SR04::begin(){

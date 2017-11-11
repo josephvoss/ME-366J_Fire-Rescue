@@ -149,7 +149,7 @@ void SampleData() {
     for (int i=0;i<64+3;i++) {
         if (i == 1) 
             rand_data[i] = sonar_range;
-        else if (i > 2) 
+        else if (i > 2)
             rand_data[i] = pixels[i-3];
         else
         {
