@@ -13,7 +13,20 @@
 #include <Adafruit_AMG88xx.h>
 #include <Wire.h>
 
-#include "html_file.h"
+#include "html_file.h"  
+
+//Node MCU Pin definitions (shouldve been included)
+static const uint8_t D0   = 16;
+static const uint8_t D1   = 5;
+static const uint8_t D2   = 4;
+static const uint8_t D3   = 0;
+static const uint8_t D4   = 2;
+static const uint8_t D5   = 14;
+static const uint8_t D6   = 12;
+static const uint8_t D7   = 13;
+static const uint8_t D8   = 15;
+static const uint8_t D9   = 3;
+static const uint8_t D10  = 1; 
 
 /* Set these to your desired credentials. */
 const char *ssid = "ESPap";
@@ -23,13 +36,21 @@ const char *password = "thereisnospoon";
 const int LED_PIN = 2;//LED_BUILTIN;
 
 /* Sensor definition */
-const int TRIGGER_PIN  = 13;  // Arduino pin tied to trigger pin on ping sensor.
-const int ECHO_PIN     = 15; // Arduino pin tied to echo pin on ping sensor.
+const int TRIGGER_PIN_1  = D7;  // Arduino pin tied to trigger pin on ping sensor.
+const int ECHO_PIN_1     = D8; // Arduino pin tied to echo pin on ping sensor.
+//const int TRIGGER_PIN_2  = D7;  // Arduino pin tied to trigger pin on ping sensor.
+//const int ECHO_PIN_2     = D8; // Arduino pin tied to echo pin on ping sensor.
+//const int TRIGGER_PIN_3  = 7;  // Arduino pin tied to trigger pin on ping sensor.
+//const int ECHO_PIN_3     = 11; // Arduino pin tied to echo pin on ping sensor.
 const int MAX_DISTANCE = 200; // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
-HC_SR04 sonar(TRIGGER_PIN, ECHO_PIN, ECHO_PIN);
-int sonar_range;
-int sonar_counter = 0;
+HC_SR04 sonar_1(TRIGGER_PIN_1, ECHO_PIN_1, ECHO_PIN_1);
+//HC_SR04 sonar_2(TRIGGER_PIN_2, ECHO_PIN_2, ECHO_PIN_2);
+//HC_SR04 sonar_3(TRIGGER_PIN_3, ECHO_PIN_3, ECHO_PIN_3);
+
+int sonar_range_1;
+//int sonar_range_2;
+//int sonar_range_3;
 
 // Thermal stuff
 Adafruit_AMG88xx amg;
@@ -42,9 +63,11 @@ TimerObject *timer10ms = new TimerObject(100); //will call the callback in the i
 int rand_data[64+3];
 char rand_string[300];
 
-#define LENGTH_ASYNC    1   // Number of Async pins
+int PWM_PIN = D0;
+#define LENGTH_ASYNC    4   // Number of Async pins
 // Pins to drive async
-int async_pins[LENGTH_ASYNC] = {LED_PIN};
+// R+, R-. L+, L-
+int async_pins[LENGTH_ASYNC] = {D1,D2,D3,D4};
 // State of those pins
 int async_state[LENGTH_ASYNC];
 // Time for those pins to be in that state
@@ -106,17 +129,46 @@ void webSocketHandler(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
             {
                 IPAddress ip = webSocket.remoteIP(num);
                 Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-                int led_state[1] = {0};
-                int led_time[1] = {10};
-                asynclikeDrive(led_state, led_time); 
+//                int led_state[1] = {0};
+//                int led_time[1] = {10};
+//                asynclikeDrive(led_state, led_time); 
             }
             break;
         case WStype_TEXT:
             {
                 Serial.printf("[%u] get Text: %s\n", num, payload);
-                int led_state[1] = {0};
-                int led_time[1] = {100};
-                asynclikeDrive(led_state, led_time); 
+
+                int drive_time[LENGTH_ASYNC] = {100,100,100,100};
+                int drive_state[LENGTH_ASYNC] = {0,0,0,0};
+                switch(payload)
+                {
+
+                    case "SENT: up":
+                        drive_state[0] = 1;
+                        drive_state[2] = 1;
+                        break;
+                    case "SENT: down":
+                        drive_state[1] = 1;
+                        drive_state[3] = 1;
+                        break;
+                    case "SENT: left":
+                        drive_state[1] = 1;
+                        drive_state[2] = 1;
+                        break;
+                    case "SENT: right":
+                        drive_state[0] = 1;
+                        drive_state[3] = 1;
+                        break;
+                    case "SENT: alarm on":
+                        digitalWrite(LED_PIN, HIGH);                    
+                        break;
+                    case "SENT: alarm off":
+                        digitalWrite(LED_PIN, LOW);                    
+                        break;
+                    default:
+                        Serial.prinft("Error! Switch invalid");
+                }
+                asynclikeDrive(drive_state, drive_time); 
             }
             break;
         case WStype_BIN:
@@ -138,21 +190,42 @@ void SampleData() {
     amg.readPixels(pixels);
 
 
-    if (sonar.isFinished())
+    if (sonar_1.isFinished())
     {
-        sonar_range = sonar.getRange(); //Returns range in cm
-        sonar.start();
+        Serial.println("Start 2");
+        sonar_range_1 = sonar_1.getRange(); //Returns range in cm
+        sonar_2.start();
     }
-
+/*    if (sonar_2.isFinished())
+    {
+        Serial.println("Start 3");
+        sonar_range_2 = sonar_2.getRange(); //Returns range in cm
+        sonar_1.start();
+    }
+    if (sonar_3.isFinished())
+    {
+        sonar_1.start();
+        Serial.println("Start 1");
+        sonar_range_3 = sonar_3.getRange(); //Returns range in cm
+    }
+	Serial.println(sonar_range_1);
+	Serial.println(sonar_range_2);
+	Serial.println(sonar_range_3);
+*/
     int length = 0;
 
     for (int i=0;i<64+3;i++) {
-        if (i == 1) 
-            rand_data[i] = sonar_range;
+        if (i == 0) 
+            rand_data[i] = sonar_range_1;
+        else if (i == 1) 
+            rand_data[i] = sonar_range_1;
+        else if (i == 2) 
+            rand_data[i] = sonar_range_1;
         else if (i > 2)
             rand_data[i] = pixels[i-3];
         else
         {
+            //Should never go here
             rand_data[i] = random(99);
         }
         length += sprintf(rand_string+length, "%d,", rand_data[i]);
@@ -174,6 +247,7 @@ void setup() {
     digitalWrite(LED_PIN,LOW);
 	delay(250);
     digitalWrite(LED_PIN,HIGH);
+
 	Serial.begin(9600);
 	Serial.println();
 	Serial.print("Configuring access point...");
@@ -181,7 +255,7 @@ void setup() {
 	WiFi.softAP(ssid, password);
 
 	IPAddress myIP = WiFi.softAPIP();
-	Serial.print("AP IP address: ");
+	Serial.print("ap ip address: ");
 	Serial.println(myIP);
     
     webSocket.begin();
@@ -195,11 +269,22 @@ void setup() {
     timer10ms->setOnTimer(&SampleData);
     timer10ms->Start(); //start the thread.
 
-    sonar.begin(); //start ultrasonic 
+    sonar_1.start(); //start ultrasonic 
+//    sonar_2.begin(); //start ultrasonic 
+//    sonar_2.start();
+//    sonar_3.begin(); //start ultrasonic 
 	Serial.println("Sonar started");
 
     amg.begin();  //start thermal
 	Serial.println("Thermal started");
+
+    for (int i=0; i<LENGTH_ASYNC; i++)
+        pinMode(asnyc_pins[i],OUTPUT);
+    pinMode(PWM_PIN, OUTPUT);
+    // 50% Speed
+//    analogWrite(PWM_PIN,512);
+    // 25% Speed
+    analogWrite(PWM_PIN,255);
 }
 
 void loop() {

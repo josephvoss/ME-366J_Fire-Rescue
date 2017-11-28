@@ -117,9 +117,9 @@
             }
             function sensor_update(sensor_array) {
                 document.getElementById("temp").innerText=sensor_array[0];
-                document.getElementById("ultral").innerText=sensor_array[1];
+                document.getElementById("ultral").innerText=sensor_array[0];
                 document.getElementById("ultraf").innerText=sensor_array[1];
-                document.getElementById("ultrar").innerText=sensor_array[1];
+                document.getElementById("ultrar").innerText=sensor_array[2];
                 document.getElementById("oxy").innerText=sensor_array[2];
             }
 
@@ -195,12 +195,12 @@
                           </div>
                     </div>
                     <div class="row padded">
-                        <div class="col-4"> 
-                            <input type="range" min="1" max="100" value="50" class="slider" id="speed-slide">
-                        </div>
-                        <div class="col-2"> 
-                            <div id="speed-out">50</div>
-                        </div>
+                          <div class="col-3"> 
+                              <input type="button" id="alarm_on" value="alarm on">
+                          </div>
+                          <div class="col-3"> 
+                              <input type="button" id="alarm_off" value="alarm off">
+                          </div>
                     </div>
                     <div class="row padded">
                     </div>
@@ -208,10 +208,10 @@
                     </div>
                     <div class="row padded" style="text-align:center" id="ultraf">N/A</div>
                     <div class="row">
-                        <div class="col-2" style="padding: 2em 0 0 0;" id="ultral" >N/A</div>
+                        <div class="col-2" style="padding: 2em 0 0 0;"></div>
                         <div class="col-2" style="border-color: red; border-style: solid; padding: 1em 0 5em 0; box-sizing: border-box;">
                         </div>
-                        <div class="col-2" style="padding: 2em 0 0 0;" id="ultrar">N/A</div>
+                        <div class="col-2" style="padding: 2em 0 0 0;"></div>
                     </div>
                     <div class="row padded">
                     </div>
@@ -251,9 +251,11 @@
         document.getElementById("right").onclick = function(){
             send_direction(document.getElementById("right").value);
         };
-        document.getElementById("speed-slide").onchange = function(){
-            document.getElementById("speed-out").outerHTML = document.getElementById("speed-slide").value;
-            send_direction(document.getElementById("speed-slide").value);
+        document.getElementById("alarm_on").onclick = function(){
+            send_direction(document.getElementById("alarm_on").value);
+        };
+        document.getElementById("alarm_off").onclick = function(){
+            send_direction(document.getElementById("alarm_off").value);
         };
 
         // Used to capture key-presses and convert into button presses
@@ -263,6 +265,8 @@
             if(event.key == "s") document.querySelector("#down").click(); // Use `.key` instead.
             if(event.key == "a") document.querySelector("#left").click(); // Use `.key` instead.
             if(event.key == "d") document.querySelector("#right").click(); // Use `.key` instead.
+            if(event.key == "q") document.querySelector("#alarm_on").click(); // Use `.key` instead.
+            if(event.key == "e") document.querySelector("#alarm_off").click(); // Use `.key` instead.
         });
     </script>
     </body>
