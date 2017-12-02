@@ -11,14 +11,13 @@ HC_SR04::HC_SR04(int trigger, int echo, int interrupt, int max_dist)
 
 void HC_SR04::begin(){
   pinMode(_trigger, OUTPUT);
-//  digitalWrite(_trigger, LOW);
+  digitalWrite(_trigger, LOW);
   pinMode(_echo, INPUT);  
-//  attachInterrupt(_int, _echo_isr, CHANGE);
-//  _finished=true;
+  attachInterrupt(_int, _echo_isr, CHANGE);
+  _finished=true;
 }
 
 void HC_SR04::start(){
-  attachInterrupt(_int, _echo_isr, CHANGE);
   _finished=false;
   digitalWrite(_trigger, HIGH);
   delayMicroseconds(10);
@@ -26,8 +25,6 @@ void HC_SR04::start(){
 }
 
 unsigned int HC_SR04::getRange(bool units){
-  this->_finished=false;
-  detachInterrupt(this->_int);
   return (_end-_start)/((units)?58:148);
 }
 
@@ -39,7 +36,6 @@ void HC_SR04::_echo_isr(){
       _this->_start=micros();
       break;
     case LOW:
-//detachInterrupt(_this->_int);
       _this->_end=micros();
       _this->_finished=true;
       break;

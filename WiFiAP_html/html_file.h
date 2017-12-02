@@ -118,9 +118,9 @@ const char* html_data =R"===(
             }
             function sensor_update(sensor_array) {
                 document.getElementById("temp").innerText=sensor_array[0];
-                document.getElementById("ultral").innerText=sensor_array[0];
+               // document.getElementById("ultral").innerText=sensor_array[0];
                 document.getElementById("ultraf").innerText=sensor_array[1];
-                document.getElementById("ultrar").innerText=sensor_array[2];
+               // document.getElementById("ultrar").innerText=sensor_array[2];
                 document.getElementById("oxy").innerText=sensor_array[2];
             }
 

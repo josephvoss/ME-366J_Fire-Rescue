@@ -36,8 +36,8 @@ const char *password = "thereisnospoon";
 const int LED_PIN = 2;//LED_BUILTIN;
 
 /* Sensor definition */
-const int TRIGGER_PIN_1  = D7;  // Arduino pin tied to trigger pin on ping sensor.
-const int ECHO_PIN_1     = D8; // Arduino pin tied to echo pin on ping sensor.
+const int TRIGGER_PIN_1  = D8;  // Arduino pin tied to trigger pin on ping sensor.
+const int ECHO_PIN_1     = D7; // Arduino pin tied to echo pin on ping sensor.
 //const int TRIGGER_PIN_2  = D7;  // Arduino pin tied to trigger pin on ping sensor.
 //const int ECHO_PIN_2     = D8; // Arduino pin tied to echo pin on ping sensor.
 //const int TRIGGER_PIN_3  = 7;  // Arduino pin tied to trigger pin on ping sensor.
@@ -67,7 +67,7 @@ int PWM_PIN = D0;
 #define LENGTH_ASYNC    4   // Number of Async pins
 // Pins to drive async
 // R+, R-. L+, L-
-int async_pins[LENGTH_ASYNC] = {D1,D2,D3,D4};
+int async_pins[LENGTH_ASYNC] = {D3,D4,D5,D6};
 // State of those pins
 int async_state[LENGTH_ASYNC];
 // Time for those pins to be in that state
@@ -122,58 +122,53 @@ void webSocketHandler(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
     switch(type) {
         case WStype_DISCONNECTED:
             {
-                Serial.printf("[%u] Disconnected!\n", num);
+                Serial.printf("[%u] Disconnected!\n\r", num);
             }
             break;
         case WStype_CONNECTED:
             {
                 IPAddress ip = webSocket.remoteIP(num);
-                Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-//                int led_state[1] = {0};
-//                int led_time[1] = {10};
-//                asynclikeDrive(led_state, led_time); 
+                Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n\r", num, ip[0], ip[1], ip[2], ip[3], payload);
             }
             break;
         case WStype_TEXT:
             {
-                Serial.printf("[%u] get Text: %s\n", num, payload);
-
+                Serial.printf("[%u] get Text: %s\n\r", num, payload);
+                String payload_str = String((char *) payload);
                 int drive_time[LENGTH_ASYNC] = {100,100,100,100};
                 int drive_state[LENGTH_ASYNC] = {0,0,0,0};
-                switch(payload)
+                if (payload_str == "up")
                 {
-
-                    case "SENT: up":
-                        drive_state[0] = 1;
-                        drive_state[2] = 1;
-                        break;
-                    case "SENT: down":
-                        drive_state[1] = 1;
-                        drive_state[3] = 1;
-                        break;
-                    case "SENT: left":
-                        drive_state[1] = 1;
-                        drive_state[2] = 1;
-                        break;
-                    case "SENT: right":
-                        drive_state[0] = 1;
-                        drive_state[3] = 1;
-                        break;
-                    case "SENT: alarm on":
-                        digitalWrite(LED_PIN, HIGH);                    
-                        break;
-                    case "SENT: alarm off":
-                        digitalWrite(LED_PIN, LOW);                    
-                        break;
-                    default:
-                        Serial.prinft("Error! Switch invalid");
+                    drive_state[0] = 1;
+                    drive_state[2] = 1;
                 }
+                else if (payload_str == "down")
+                {
+                    drive_state[1] = 1;
+                    drive_state[3] = 1;
+                }
+                else if (payload_str == "left")
+                {
+                    drive_state[1] = 1;
+                    drive_state[2] = 1;
+                }
+                else if (payload_str == "right")
+                {
+                    drive_state[0] = 1;
+                    drive_state[3] = 1;
+                }
+                else if (payload_str == "alarm on")
+                    digitalWrite(LED_PIN, HIGH);                    
+                else if (payload_str == "alarm off")
+                    digitalWrite(LED_PIN, LOW);                    
+                else
+                    Serial.printf("Error! Switch invalid");
                 asynclikeDrive(drive_state, drive_time); 
             }
             break;
         case WStype_BIN:
             {
-                Serial.printf("[%u] get binary length: %u\n", num, length);
+                Serial.printf("[%u] get binary length: %u\n\r", num, length);
                 hexdump(payload, length);
             }
             break;
@@ -194,24 +189,8 @@ void SampleData() {
     {
         Serial.println("Start 2");
         sonar_range_1 = sonar_1.getRange(); //Returns range in cm
-        sonar_2.start();
-    }
-/*    if (sonar_2.isFinished())
-    {
-        Serial.println("Start 3");
-        sonar_range_2 = sonar_2.getRange(); //Returns range in cm
         sonar_1.start();
     }
-    if (sonar_3.isFinished())
-    {
-        sonar_1.start();
-        Serial.println("Start 1");
-        sonar_range_3 = sonar_3.getRange(); //Returns range in cm
-    }
-	Serial.println(sonar_range_1);
-	Serial.println(sonar_range_2);
-	Serial.println(sonar_range_3);
-*/
     int length = 0;
 
     for (int i=0;i<64+3;i++) {
@@ -269,17 +248,14 @@ void setup() {
     timer10ms->setOnTimer(&SampleData);
     timer10ms->Start(); //start the thread.
 
-    sonar_1.start(); //start ultrasonic 
-//    sonar_2.begin(); //start ultrasonic 
-//    sonar_2.start();
-//    sonar_3.begin(); //start ultrasonic 
+    sonar_1.begin(); //start ultrasonic 
 	Serial.println("Sonar started");
 
     amg.begin();  //start thermal
 	Serial.println("Thermal started");
 
     for (int i=0; i<LENGTH_ASYNC; i++)
-        pinMode(asnyc_pins[i],OUTPUT);
+        pinMode(async_pins[i],OUTPUT);
     pinMode(PWM_PIN, OUTPUT);
     // 50% Speed
 //    analogWrite(PWM_PIN,512);
