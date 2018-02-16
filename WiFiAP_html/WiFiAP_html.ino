@@ -34,6 +34,7 @@ const char *password = "thereisnospoon";
 
 /* Pin definition */
 const int LED_PIN = 2;//LED_BUILTIN;
+const int ALARM_PIN = D9;
 
 /* Sensor definition */
 const int TRIGGER_PIN_1  = D8;  // Arduino pin tied to trigger pin on ping sensor.
@@ -99,9 +100,9 @@ void asynclikeUpdate()
     for (int i=0; i < LENGTH_ASYNC; i++)
     {
         // Check state and check timer
-        if (async_state[i] == 0 && curr_time >= async_timeoff[i])
+        if (async_state[i] == 1 && curr_time >= async_timeoff[i])
         {
-            async_state[i] = 1;
+            async_state[i] = 0;
             digitalWrite(async_pins[i], async_state[i]);
         }
     }
@@ -122,20 +123,20 @@ void webSocketHandler(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
     switch(type) {
         case WStype_DISCONNECTED:
             {
-                Serial.printf("[%u] Disconnected!\n\r", num);
+            //    Serial.printf("[%u] Disconnected!\n\r", num);
             }
             break;
         case WStype_CONNECTED:
             {
                 IPAddress ip = webSocket.remoteIP(num);
-                Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n\r", num, ip[0], ip[1], ip[2], ip[3], payload);
+          //      Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n\r", num, ip[0], ip[1], ip[2], ip[3], payload);
             }
             break;
         case WStype_TEXT:
             {
-                Serial.printf("[%u] get Text: %s\n\r", num, payload);
+            //    Serial.printf("[%u] get Text: %s\n\r", num, payload);
                 String payload_str = String((char *) payload);
-                int drive_time[LENGTH_ASYNC] = {100,100,100,100};
+                int drive_time[LENGTH_ASYNC] = {500,500,500,500};
                 int drive_state[LENGTH_ASYNC] = {0,0,0,0};
                 if (payload_str == "up")
                 {
@@ -158,9 +159,9 @@ void webSocketHandler(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
                     drive_state[3] = 1;
                 }
                 else if (payload_str == "alarm on")
-                    digitalWrite(LED_PIN, HIGH);                    
+                    digitalWrite(ALARM_PIN, HIGH);                    
                 else if (payload_str == "alarm off")
-                    digitalWrite(LED_PIN, LOW);                    
+                    digitalWrite(ALARM_PIN, LOW);                    
                 else
                     Serial.printf("Error! Switch invalid");
                 asynclikeDrive(drive_state, drive_time); 
@@ -168,7 +169,7 @@ void webSocketHandler(uint8_t num, WStype_t type, uint8_t * payload, size_t leng
             break;
         case WStype_BIN:
             {
-                Serial.printf("[%u] get binary length: %u\n\r", num, length);
+                //Serial.printf("[%u] get binary length: %u\n\r", num, length);
                 hexdump(payload, length);
             }
             break;
@@ -187,7 +188,7 @@ void SampleData() {
 
     if (sonar_1.isFinished())
     {
-        Serial.println("Start 2");
+        //Serial.println("Start 2");
         sonar_range_1 = sonar_1.getRange(); //Returns range in cm
         sonar_1.start();
     }
@@ -214,45 +215,47 @@ void SampleData() {
 }
 
 void setup() {
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN,LOW);
-	delay(250);
-    digitalWrite(LED_PIN,HIGH);
-	delay(250);
-    digitalWrite(LED_PIN,LOW);
-	delay(250);
-    digitalWrite(LED_PIN,HIGH);
-	delay(250);
-    digitalWrite(LED_PIN,LOW);
-	delay(250);
-    digitalWrite(LED_PIN,HIGH);
+//    pinMode(LED_PIN, OUTPUT);
+//    digitalWrite(LED_PIN,LOW);
+//	delay(250);
+//    digitalWrite(LED_PIN,HIGH);
+//	delay(250);
+//    digitalWrite(LED_PIN,LOW);
+//	delay(250);
+//    digitalWrite(LED_PIN,HIGH);
+//	delay(250);
+//    digitalWrite(LED_PIN,LOW);
+//	delay(250);
+//    digitalWrite(LED_PIN,HIGH);
 
-	Serial.begin(9600);
-	Serial.println();
-	Serial.print("Configuring access point...");
+    pinMode(ALARM_PIN, OUTPUT);
+    digitalWrite(ALARM_PIN,LOW);
+	//Serial.begin(9600);
+	//Serial.println();
+	//Serial.print("Configuring access point...");
 	/* You can remove the password parameter if you want the AP to be open. */
 	WiFi.softAP(ssid, password);
 
 	IPAddress myIP = WiFi.softAPIP();
-	Serial.print("ap ip address: ");
-	Serial.println(myIP);
+	//Serial.print("ap ip address: ");
+	//Serial.println(myIP);
     
     webSocket.begin();
     webSocket.onEvent(webSocketHandler);
-	Serial.println("Websocket Started");
+	//Serial.println("Websocket Started");
 
 	server.on("/", handleRoot);
 	server.begin();
-	Serial.println("HTTP server started");
+	//Serial.println("HTTP server started");
 
     timer10ms->setOnTimer(&SampleData);
     timer10ms->Start(); //start the thread.
 
     sonar_1.begin(); //start ultrasonic 
-	Serial.println("Sonar started");
+	//Serial.println("Sonar started");
 
     amg.begin();  //start thermal
-	Serial.println("Thermal started");
+	//Serial.println("Thermal started");
 
     for (int i=0; i<LENGTH_ASYNC; i++)
         pinMode(async_pins[i],OUTPUT);
@@ -260,7 +263,7 @@ void setup() {
     // 50% Speed
 //    analogWrite(PWM_PIN,512);
     // 25% Speed
-    analogWrite(PWM_PIN,255);
+    analogWrite(PWM_PIN,1024);
 }
 
 void loop() {

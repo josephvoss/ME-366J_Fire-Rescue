@@ -90,10 +90,10 @@ const char* html_data =R"===(
                 body.appendChild(tbl);
             }
             function table_update(temp_matrix) {
-                // Get max and mins
                 var values = temp_matrix.reduce(function (p, c) {
                   return p.concat(c);
                 });
+                // Get max and mins
                 var max_temp = Math.max.apply(null, values);
                 var min_temp = Math.min.apply(null, values);
 
@@ -105,7 +105,7 @@ const char* html_data =R"===(
                         td = tr.children[j];
                        
                         // Show only 2 digit number
-                        var myNumber = temp_matrix[i][j];
+                        var myNumber = temp_matrix[j][i];
                         var dec = myNumber - Math.floor(myNumber);
                         myNumber = myNumber - dec;
                         var formattedNumber = ("0" + myNumber).slice(-2) + dec.toString().substr(1);
@@ -118,9 +118,9 @@ const char* html_data =R"===(
             }
             function sensor_update(sensor_array) {
                 document.getElementById("temp").innerText=sensor_array[0];
-               // document.getElementById("ultral").innerText=sensor_array[0];
+//                document.getElementById("ultral").innerText=sensor_array[0];
                 document.getElementById("ultraf").innerText=sensor_array[1];
-               // document.getElementById("ultrar").innerText=sensor_array[2];
+//                document.getElementById("ultrar").innerText=sensor_array[2];
                 document.getElementById("oxy").innerText=sensor_array[2];
             }
 

@@ -89,10 +89,10 @@
                 body.appendChild(tbl);
             }
             function table_update(temp_matrix) {
-                // Get max and mins
                 var values = temp_matrix.reduce(function (p, c) {
                   return p.concat(c);
                 });
+                // Get max and mins
                 var max_temp = Math.max.apply(null, values);
                 var min_temp = Math.min.apply(null, values);
 
@@ -104,7 +104,7 @@
                         td = tr.children[j];
                        
                         // Show only 2 digit number
-                        var myNumber = temp_matrix[i][j];
+                        var myNumber = temp_matrix[j][i];
                         var dec = myNumber - Math.floor(myNumber);
                         myNumber = myNumber - dec;
                         var formattedNumber = ("0" + myNumber).slice(-2) + dec.toString().substr(1);
@@ -240,16 +240,16 @@
 
         // Add handlers to all the buttons
         document.getElementById("up").onclick = function(){
-            send_direction(document.getElementById("up").value);
-        };
-        document.getElementById("down").onclick = function(){
-            send_direction(document.getElementById("down").value);
-        };
-        document.getElementById("left").onclick = function(){
             send_direction(document.getElementById("left").value);
         };
-        document.getElementById("right").onclick = function(){
+        document.getElementById("down").onclick = function(){
             send_direction(document.getElementById("right").value);
+        };
+        document.getElementById("left").onclick = function(){
+            send_direction(document.getElementById("down").value);
+        };
+        document.getElementById("right").onclick = function(){
+            send_direction(document.getElementById("up").value);
         };
         document.getElementById("alarm_on").onclick = function(){
             send_direction(document.getElementById("alarm_on").value);
