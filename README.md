@@ -1,5 +1,5 @@
 Info about this project is available
-[here](http://localhost:4000/mechanical/academic/software/2017/12/16/Fire-Rescue-Robot)
+[here](http://josephvoss.com/mechanical/academic/software/2017/12/16/Fire-Rescue-Robot)
 
 Need to install Arduino, WebSockets, TimerObject, NewPing, ESP8266WiFi and boards
 
